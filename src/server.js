@@ -1,8 +1,24 @@
 const express = require('express')
-const { getCache, setCache } = require('./cache')
+const { getCache, setCache, clearCache } = require('./cache')
 
 function startServer(port, origin) {
     const app = express()
+
+    //listening to terminal input
+    process.stdin.setEncoding('utf8')
+    process.stdin.on('data', (input) => {
+        input = input.trim()
+
+        if (input === 'clear' || input === 'clear-cache') {
+            clearCache()
+            console.log('Cache cleared manually!')
+        }
+
+        if (input === 'exit') {
+            console.log('Server shutting down...')
+            process.exit(0)
+        }
+    })
 
     app.use(async (req, res) => {
         const cacheKey = req.originalUrl
@@ -49,6 +65,10 @@ function startServer(port, origin) {
     app.listen(port, () => {
         console.log(`Caching Proxy Server running on port ${port}`)
         console.log(`Forwarding requests to: ${origin}`)
+        console.log('')
+        console.log("Type 'clear' to clear the cache")
+        console.log("Type 'exit' to stop the server")
+        console.log('------------------------------------')
     })
 }
 
