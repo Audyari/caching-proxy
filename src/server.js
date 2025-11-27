@@ -10,8 +10,12 @@ function startServer(port, origin) {
         input = input.trim()
 
         if (input === 'clear' || input === 'clear-cache') {
-            clearCache()
-            console.log('Cache cleared manually!')
+            clearCache().then(() => {
+                console.log('Cache cleared manually!')
+            }).catch(error => {
+                console.error('Error clearing cache:', error.message)
+                console.log('Cache cleared manually!')
+            })
         }
 
         if (input === 'exit') {
@@ -29,7 +33,7 @@ function startServer(port, origin) {
             `[${timestamp}] Incoming Request: ${req.method} ${req.originalUrl}`
         )
 
-        const cachedResponse = getCache(cacheKey)
+        const cachedResponse = await getCache(cacheKey)
 
         if (cachedResponse) {
             console.log(
@@ -53,7 +57,7 @@ function startServer(port, origin) {
                 `[CACHE STORE] Saving response to cache for: ${req.originalUrl}`
             )
 
-            setCache(cacheKey, data)
+            await setCache(cacheKey, data)
             res.setHeader('X-Cache', 'MISS')
             return res.status(response.status).send(data)
         } catch (error) {
